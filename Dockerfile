@@ -4,9 +4,10 @@ WORKDIR /go/src/app
 COPY . .
 RUN go get -u github.com/golang/dep/cmd/dep
 RUN dep ensure
-RUN go install -v .
-RUN go build -o app
+RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags "-w -X main.version=$(git describe --tags --dirty --always)" -o app
 
 FROM scratch
 COPY --from=build /go/src/app/app /app
-ENTRYPOINT ["./app"]
+ENTRYPOINT ["/app"]
+
+EXPOSE 8080
